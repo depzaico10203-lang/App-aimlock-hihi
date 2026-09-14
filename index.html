@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0e1a">
+<title>🎯 CENTER LOCK</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0a0e1a;
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+    user-select: none;
+  }
+
+  /* ============ NÚT ÂM THANH ============ */
+  .btn-sound {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #111827;
+    border: 1px solid #1f2937;
+    color: #00ff88;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .btn-sound:active { transform: scale(0.9); }
+  .btn-sound.muted { color: #4b5563; border-color: #374151; }
+  @keyframes soundPing {
+    0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.6); }
+    100% { box-shadow: 0 0 0 12px rgba(0, 255, 136, 0); }
+  }
+  .btn-sound.ping { animation: soundPing 0.4s ease-out; }
+
+  /* ============ SCREENS ============ */
+  .screen {
+    display: none;
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 24px;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+  .screen.active { display: flex; }
+
+  /* ============ SCREEN 1: KEY ============ */
+  #screenKey .logo {
+    font-size: 28px;
+    font-weight: 900;
+    color: #00ff88;
+    letter-spacing: 3px;
+    text-align: center;
+    text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+  }
+
+  .sub {
+    color: #94a3b8;
+    text-align: center;
+    margin-top: 8px;
+    margin-bottom: 40px;
+    font-size: 14px;
+  }
+
+  .key-input {
+    width: 100%;
+    background: #111827;
+    color: #00ff88;
+    font-size: 18px;
+    padding: 16px;
+    border-radius: 12px;
+    border: 2px solid #1f2937;
+    text-align: center;
+    letter-spacing: 2px;
+    font-weight: 700;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+
+  .key-input:focus { border-color: #00ff88; }
+  .key-input::placeholder {
+    color: #4b5563;
+    letter-spacing: 1px;
+    font-weight: 500;
+    font-size: 15px;
+  }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    margin-top: 16px;
+    cursor: pointer;
+  }
+
+  .checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 2px solid #4b5563;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .checkbox.on {
+    background: #00ff88;
+    border-color: #00ff88;
+  }
+
+  .checkbox.on::after {
+    content: '✓';
+    color: #0a0e1a;
+    font-weight: 900;
+    font-size: 14px;
+  }
+
+  .toggle-text { color: #94a3b8; font-size: 14px; }
+
+  .btn-main {
+    width: 100%;
+    background: #00ff88;
+    color: #0a0e1a;
+    padding: 18px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 16px;
+    letter-spacing: 2px;
+    margin-top: 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+  }
+
+  .btn-main:active { transform: scale(0.97); }
+  .btn-main:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .hint {
+    color: #4b5563;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 12px;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #0a0e1a;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ============ SCREEN 2: LOADING ============ */
+  #screenLoading {
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .loading-ring {
+    width: 80px;
+    height: 80px;
+    border: 4px solid #1f2937;
+    border-top-color: #00ff88;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .loading-text {
+    color: #00ff88;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+
+  .loading-sub {
+    color: #94a3b8;
+    font-size: 13px;
+    margin-top: -12px;
+  }
+
+  /* ============ SCREEN 3: MENU ============ */
+  #screenMenu {
+    justify-content: flex-start;
+    padding-bottom: 230px;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+  }
+
+  .header .logo {
+    font-size: 20px;
+    font-weight: 900;
+    color: #00ff88;
+    letter-spacing: 2px;
+    text-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+  }
+
+  .tier-row {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    gap: 10px;
+  }
+
+  .tier {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: #422006;
+    color: #fbbf24;
+  }
+
+  .tier.vip { background: #713f12; color: #fde047; }
+
+  .active-count { color: #94a3b8; font-size: 12px; }
+
+  .logout-btn {
+    background: none;
+    border: none;
+    color: #ef4444;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 8px;
+    font-family: inherit;
+  }
+
+  .features-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .card {
+    display: flex;
+    align-items: center;
+    background: #111827;
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid #1f2937;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .card:active { transform: scale(0.98); }
+
+  .card.on {
+    border-color: #00ff88;
+    background: #0a1f16;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
+  }
+
+  .card.locked { opacity: 0.5; cursor: not-allowed; }
+
+  .card-icon { font-size: 28px; margin-right: 14px; flex-shrink: 0; }
+
+  .card-body { flex: 1; min-width: 0; }
+
+  .card-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .card-name { color: #fff; font-size: 16px; font-weight: 800; }
+
+  .pro-badge {
+    color: #fde047;
+    background: #713f12;
+    font-size: 9px;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+  }
+
+  .lock-badge { font-size: 12px; }
+
+  .card-desc { color: #94a3b8; font-size: 12px; margin-top: 3px; }
+
+  .switch {
+    width: 50px;
+    height: 28px;
+    background: #374151;
+    border-radius: 14px;
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .switch.on { background: #00ff88; }
+
+  .switch::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    background: #9ca3af;
+    border-radius: 50%;
+    transition: all 0.2s;
+  }
+
+  .switch.on::after {
+    left: 25px;
+    background: #0a0e1a;
+  }
+
+  /* ============ ACTION BAR ============ */
+  .action-bar {
+    position: fixed;
+    bottom: 90px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  .btn-ff {
+    flex: 1;
+    padding: 18px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ff6b00, #ff2d00);
+    color: #fff;
+    font-weight: 900;
+    font-size: 15px;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 8px 30px rgba(255, 107, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    animation: ffPulse 2s ease-in-out infinite;
+    transition: transform 0.15s;
+  }
+
+  .btn-ff:active { transform: scale(0.96); }
+  .btn-ff:disabled { opacity: 0.5; animation: none; cursor: wait; }
+
+  @keyframes ffPulse {
+    0%, 100% { box-shadow: 0 8px 30px rgba(255, 107, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) inset; }
+    50% { box-shadow: 0 8px 45px rgba(255, 107, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.2) inset; }
+  }
+
+  .btn-fallback {
+    width: 54px;
+    border: 1px solid #1f2937;
+    border-radius: 14px;
+    background: #111827;
+    color: #94a3b8;
+    font-size: 20px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .btn-fallback:active { transform: scale(0.96); background: #1f2937; }
+
+  /* ============ BOTTOM BAR ============ */
+  .bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    gap: 10px;
+    padding: 16px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+    background: #0a0e1a;
+    border-top: 1px solid #1f2937;
+    z-index: 100;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .bottom-bar button {
+    flex: 1;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 14px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .bottom-bar button:active { transform: scale(0.97); }
+
+  .btn-on { background: #00ff88; color: #0a0e1a; }
+  .btn-off { background: #374151; color: #0a0e1a; }
+
+  /* ============ TOAST ============ */
+  #toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-120%);
+    background: #111827;
+    color: #fff;
+    padding: 14px 20px;
+    border-radius: 12px;
+    border: 1px solid #1f2937;
+    font-size: 14px;
+    z-index: 10001;
+    transition: transform 0.3s;
+    max-width: 90vw;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  }
+
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.success { border-color: #00ff88; color: #00ff88; }
+  #toast.error { border-color: #ef4444; color: #ef4444; }
+
+  /* ============ MODAL ============ */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: flex-end;
+    z-index: 9998;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+
+  .modal-sheet {
+    width: 100%;
+    background: #111827;
+    border-radius: 24px 24px 0 0;
+    padding: 24px;
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+    transform: translateY(100%);
+    transition: transform 0.3s;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .modal-overlay.show .modal-sheet { transform: translateY(0); }
+
+  .modal-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  .modal-sub {
+    color: #94a3b8;
+    font-size: 13px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .modal-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: #0a0e1a;
+    border: 1px solid #1f2937;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .modal-option:active {
+    transform: scale(0.98);
+    border-color: #ff6b00;
+  }
+
+  .modal-option .icon { font-size: 28px; flex-shrink: 0; }
+  .modal-option .text { flex: 1; }
+  .modal-option .title { color: #fff; font-weight: 700; font-size: 15px; }
+  .modal-option .desc { color: #94a3b8; font-size: 12px; margin-top: 3px; }
+
+  .modal-cancel {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    border: 1px solid #374151;
+    border-radius: 12px;
+    color: #94a3b8;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<button class="btn-sound" id="btnSound" title="Bật/tắt âm thanh">🔊</button>
+
+<!-- ============ SCREEN 1: XÁC MINH KEY ============ -->
+<div class="screen active" id="screenKey">
+  <div class="logo">🎯 CENTER LOCK</div>
+  <div class="sub">Nhập key để mở khóa</div>
+
+  <input
+    type="text"
+    id="keyInput"
+    class="key-input"
+    placeholder="Nhập key tại đây..."
+    autocomplete="new-password"
+    autocapitalize="characters"
+    spellcheck="false"
+    readonly
+  >
+
+  <div class="toggle-row" id="toggleRemember">
+    <div class="checkbox on" id="cbRemember"></div>
+    <span class="toggle-text">Ghi nhớ key</span>
+  </div>
+
+  <button class="btn-main" id="btnVerify">🔓 XÁC MINH KEY</button>
+
+  <div class="hint">Liên hệ admin để nhận key</div>
+</div>
+
+<!-- ============ SCREEN 2: LOADING ============ -->
+<div class="screen" id="screenLoading">
+  <div class="loading-ring"></div>
+  <div class="loading-text">✅ KEY HỢP LỆ</div>
+  <div class="loading-sub">Đang vào app...</div>
+</div>
+
+<!-- ============ SCREEN 3: MENU CHỨC NĂNG ============ -->
+<div class="screen" id="screenMenu">
+  <div class="header">
+    <div style="flex:1">
+      <div class="logo">🎯 CENTER LOCK</div>
+      <div class="tier-row">
+        <span class="tier" id="tierBadge">⭐ BASIC</span>
+        <span class="active-count" id="activeCount">Bật: 0/7</span>
+      </div>
+    </div>
+    <button class="logout-btn" id="btnLogout">Thoát</button>
+  </div>
+
+  <div class="features-list" id="featuresList"></div>
+
+  <div class="action-bar">
+    <button class="btn-ff" id="btnOpenFF">🎮 MỞ FREE FIRE</button>
+    <button class="btn-fallback" id="btnFallback" title="Mở bằng cách khác">↗</button>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="btn-on" id="btnAllOn">⚡ BẬT TẤT CẢ</button>
+    <button class="btn-off" id="btnAllOff">⛔ TẮT TẤT CẢ</button>
+  </div>
+</div>
+
+<!-- MODAL MỞ FF -->
+<div class="modal-overlay" id="ffModal">
+  <div class="modal-sheet">
+    <div class="modal-title">🎮 Mở Free Fire</div>
+    <div class="modal-sub">Chọn cách mở phù hợp</div>
+
+    <div class="modal-option" data-method="deeplink">
+      <div class="icon">📱</div>
+      <div class="text">
+        <div class="title">Mở trực tiếp FF</div>
+        <div class="desc">Deep link — nhanh nhất</div>
+      </div>
+    </div>
+
+    <div class="modal-option" data-method="intent">
+      <div class="icon">🤖</div>
+      <div class="text">
+        <div class="title">Mở bằng Android Intent</div>
+        <div class="desc">Chỉ hoạt động trên Android</div>
+      </div>
+    </div>
+
+    <div class="modal-option" data-method="store">
+      <div class="icon">🏪</div>
+      <div class="text">
+        <div class="title">Mở cửa hàng ứng dụng</div>
+        <div class="desc">CH Play / App Store</div>
+      </div>
+    </div>
+
+    <button class="modal-cancel" id="btnModalCancel">Hủy</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   🔊 SOUND ENGINE
+   ============================================================ */
+const Sound = (() => {
+  let ctx = null;
+  let enabled = localStorage.getItem('@cl_sound') !== 'off';
+  const volume = 0.25;
+
+  function init() {
+    if (!ctx) {
+      try { ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch (e) {}
+    }
+    if (ctx && ctx.state === 'suspended') ctx.resume();
+  }
+
+  function tone({ freq = 440, duration = 0.15, type = 'sine', vol = 1, delay = 0 }) {
+    if (!enabled) return;
+    init();
+    if (!ctx) return;
+    const t0 = ctx.currentTime + delay;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(0, t0);
+    gain.gain.linearRampToValueAtTime(volume * vol, t0 + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + duration + 0.05);
+  }
+
+  function melody(notes, gap = 0.08) {
+    notes.forEach((n, i) => {
+      tone({ freq: n.freq, duration: n.duration || 0.15, type: n.type || 'sine', vol: n.vol || 1, delay: i * gap });
+    });
+  }
+
+  const sounds = {
+    click: () => tone({ freq: 800, duration: 0.05, type: 'square', vol: 0.5 }),
+    toggleOn: () => melody([{ freq: 660, duration: 0.08 }, { freq: 990, duration: 0.12 }], 0.05),
+    toggleOff: () => melody([{ freq: 660, duration: 0.08 }, { freq: 440, duration: 0.12 }], 0.05),
+    success: () => melody([{ freq: 523, duration: 0.12 }, { freq: 659, duration: 0.12 }, { freq: 784, duration: 0.2 }], 0.1),
+    error: () => melody([{ freq: 330, duration: 0.15, type: 'sawtooth' }, { freq: 262, duration: 0.25, type: 'sawtooth' }], 0.12),
+    launch: () => melody([{ freq: 400, duration: 0.05 }, { freq: 600, duration: 0.05 }, { freq: 800, duration: 0.05 }, { freq: 1200, duration: 0.15 }], 0.04),
+    power: () => melody([{ freq: 523, duration: 0.08 }, { freq: 659, duration: 0.08 }, { freq: 784, duration: 0.08 }, { freq: 1047, duration: 0.2 }], 0.08),
+    bye: () => melody([{ freq: 523, duration: 0.12 }, { freq: 392, duration: 0.2 }], 0.1),
+    login: () => melody([{ freq: 392, duration: 0.1 }, { freq: 523, duration: 0.1 }, { freq: 659, duration: 0.1 }, { freq: 784, duration: 0.25 }], 0.08),
+  };
+
+  return {
+    play(name) {
+      if (!enabled) return;
+      init();
+      const fn = sounds[name] || sounds.click;
+      try { fn(); } catch (e) {}
+    },
+    toggle() {
+      enabled = !enabled;
+      localStorage.setItem('@cl_sound', enabled ? 'on' : 'off');
+      if (enabled) { init(); setTimeout(() => this.play('toggleOn'), 50); }
+      return enabled;
+    },
+    isEnabled() { return enabled; },
+    init,
+  };
+})();
+
+/* ============================================================
+   🎮 CẤU HÌNH
+   ============================================================ */
+const FEATURES = [
+  { id: 'aimlock', name: 'Aimlock',  icon: '🎯', desc: 'Khóa tâm tự động',      pro: false },
+  { id: 'nhetam',  name: 'Nhẹ tâm',  icon: '🧘', desc: 'Giảm giật khi ngắm',   pro: false },
+  { id: 'bamdan',  name: 'Bám đầu',  icon: '🎪', desc: 'Theo dõi đầu đối thủ', pro: true  },
+  { id: 'fixrung', name: 'Fix rung', icon: '📳', desc: 'Chống rung màn hình',  pro: false },
+  { id: 'fixlo',   name: 'Fix lố',   icon: '📐', desc: 'Chỉnh lệch tâm',        pro: true  },
+  { id: 'aimdrag', name: 'Aimdrag',  icon: '🖱️', desc: 'Kéo tâm mượt',         pro: true  },
+  { id: 'aimco',   name: 'Aimco',    icon: '🎯', desc: 'Tâm ngắm tùy chỉnh',   pro: false },
+];
+
+/* 🔑 KEY DUY NHẤT HỢP LỆ */
+const VALID_KEY = 'DST-000-654';
+const VALID_TIER = 'vip';
+
+const FF_ANDROID_PACKAGE = 'com.dts.freefireth';
+const FF_ANDROID_MAX = 'com.dts.freefiremax';
+const FF_IOS_ID = '1300146617';
+const FF_PLAY_STORE = `https://play.google.com/store/apps/details?id=${FF_ANDROID_PACKAGE}`;
+const FF_APP_STORE = `https://apps.apple.com/vn/app/id${FF_IOS_ID}`;
+
+/* ============================================================
+   🍞 TOAST
+   ============================================================ */
+let toastTimer;
+function toast(msg, type = 'info') {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = type; }, 2500);
+}
+
+/* ============================================================
+   🖥️ CHUYỂN SCREEN
+   ============================================================ */
+function showScreen(id) {
+  const target = document.getElementById(id);
+  if (!target) return;
+  document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
+  target.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+/* ============================================================
+   🔐 XÁC MINH KEY
+   ============================================================ */
+function verifyKey(inputKey) {
+  const clean = (inputKey || '').trim().toUpperCase();
+  if (!clean) return { valid: false, msg: 'Chưa nhập key' };
+  if (clean !== VALID_KEY) return { valid: false, msg: 'Key không đúng' };
+  return { valid: true, tier: VALID_TIER };
+}
+
+/* ============================================================
+   🚀 XỬ LÝ XÁC MINH
+   ============================================================ */
+function handleVerify() {
+  const input = document.getElementById('keyInput');
+  const btn = document.getElementById('btnVerify');
+  if (!input || !btn) return;
+
+  const key = input.value.trim();
+
+  if (!key) {
+    Sound.play('error');
+    toast('⚠️ Nhập key đã bạn', 'error');
+    input.focus();
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> ĐANG XÁC MINH...';
+
+  const result = verifyKey(key);
+
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.innerHTML = '🔓 XÁC MINH KEY';
+
+    if (result.valid) {
+      Sound.play('login');
+
+      try {
+        if (document.getElementById('cbRemember')?.classList.contains('on')) {
+          localStorage.setItem('@cl_key', key.toUpperCase());
+        } else {
+          localStorage.removeItem('@cl_key');
+        }
+        localStorage.setItem('@cl_tier', result.tier);
+        localStorage.setItem('@cl_session', '1');
+      } catch (e) {}
+
+      showScreen('screenLoading');
+      setTimeout(() => enterApp(), 1500);
+
+    } else {
+      Sound.play('error');
+      toast('❌ ' + result.msg, 'error');
+      input.value = '';
+      input.focus();
+    }
+  }, 300);
+}
+
+/* ============================================================
+   🎨 RENDER MENU
+   ============================================================ */
+function getFeatureStates() {
+  try { return JSON.parse(localStorage.getItem('@cl_features') || '{}'); }
+  catch { return {}; }
+}
+
+function saveFeatureStates(states) {
+  localStorage.setItem('@cl_features', JSON.stringify(states));
+}
+
+function renderFeatures(tier) {
+  const states = getFeatureStates();
+  const list = document.getElementById('featuresList');
+  if (!list) return;
+  list.innerHTML = '';
+
+  FEATURES.forEach((f) => {
+    const locked = f.pro && tier !== 'vip';
+    const on = !!states[f.id];
+
+    const card = document.createElement('div');
+    card.className = 'card' + (on ? ' on' : '') + (locked ? ' locked' : '');
+    card.innerHTML = `
+      <div class="card-icon">${f.icon}</div>
+      <div class="card-body">
+        <div class="card-title-row">
+          <span class="card-name">${f.name}</span>
+          ${f.pro ? '<span class="pro-badge">PRO</span>' : ''}
+          ${locked ? '<span class="lock-badge">🔒</span>' : ''}
+        </div>
+        <div class="card-desc">${f.desc}</div>
+      </div>
+      <div class="switch${on ? ' on' : ''}"></div>
+    `;
+
+    card.onclick = () => {
+      Sound.play('click');
+      toggleFeature(f.id, f.pro, tier);
+    };
+    list.appendChild(card);
+  });
+
+  updateActiveCount();
+}
+
+function updateActiveCount() {
+  const states = getFeatureStates();
+  const active = Object.values(states).filter(Boolean).length;
+  const el = document.getElementById('activeCount');
+  if (el) el.textContent = `Bật: ${active}/${FEATURES.length}`;
+}
+
+function toggleFeature(id, pro, tier) {
+  if (pro && tier !== 'vip') {
+    Sound.play('error');
+    toast('👑 Chức năng VIP — cần key VIP', 'error');
+    return;
+  }
+  const states = getFeatureStates();
+  states[id] = !states[id];
+  saveFeatureStates(states);
+  renderFeatures(tier);
+  Sound.play(states[id] ? 'toggleOn' : 'toggleOff');
+  const f = FEATURES.find((x) => x.id === id);
+  toast(`${f.icon} ${f.name} ${states[id] ? 'BẬT' : 'TẮT'}`, states[id] ? 'success' : 'info');
+}
+
+/* ============================================================
+   🎯 VÀO APP
+   ============================================================ */
+function enterApp() {
+  const tier = localStorage.getItem('@cl_tier') || VALID_TIER;
+
+  const badge = document.getElementById('tierBadge');
+  if (badge) {
+    if (tier === 'vip') {
+      badge.textContent = '👑 VIP';
+      badge.classList.add('vip');
+    } else {
+      badge.textContent = '⭐ BASIC';
+      badge.classList.remove('vip');
+    }
+  }
+
+  renderFeatures(tier);
+  showScreen('screenMenu');
+}
+
+/* ============================================================
+   🎮 MỞ FREE FIRE
+   ============================================================ */
+function getPlatform() {
+  const ua = navigator.userAgent || '';
+  if (/android/i.test(ua)) return 'android';
+  if (/iPad|iPhone|iPod/.test(ua)) return 'ios';
+  return 'desktop';
+}
+
+function openViaDeepLink() {
+  const platform = getPlatform();
+  if (platform === 'android') {
+    window.location.href =
+      `intent://launch/#Intent;scheme=freefire;package=${FF_ANDROID_PACKAGE};` +
+      `S.browser_fallback_url=${encodeURIComponent(FF_PLAY_STORE)};end`;
+    return true;
+  }
+  if (platform === 'ios') {
+    const start = Date.now();
+    window.location.href = 'freefire://';
+    setTimeout(() => {
+      if (Date.now() - start < 2500 && !document.hidden) {
+        window.location.href = FF_APP_STORE;
+      }
+    }, 2000);
+    return true;
+  }
+  toast('🖥️ Web không mở được FF trên PC', 'error');
+  return false;
+}
+
+function openViaIntent() {
+  if (getPlatform() !== 'android') {
+    toast('🤖 Chỉ hoạt động trên Android', 'error');
+    return;
+  }
+  const tryPackage = (pkg) => {
+    window.location.href =
+      `intent://#Intent;scheme=android-app;package=${pkg};` +
+      `S.browser_fallback_url=${encodeURIComponent('https://play.google.com/store/apps/details?id=' + pkg)};end`;
+  };
+  tryPackage(FF_ANDROID_PACKAGE);
+  setTimeout(() => { if (!document.hidden) tryPackage(FF_ANDROID_MAX); }, 1500);
+}
+
+function openStore() {
+  if (getPlatform() === 'ios') window.open(FF_APP_STORE, '_blank');
+  else window.open(FF_PLAY_STORE, '_blank');
+}
+
+function openFFModal() {
+  const m = document.getElementById('ffModal');
+  if (m) m.classList.add('show');
+}
+function closeFFModal() {
+  const m = document.getElementById('ffModal');
+  if (m) m.classList.remove('show');
+}
+
+function handleOpenFF() {
+  Sound.play('launch');
+  const btn = document.getElementById('btnOpenFF');
+  if (getPlatform() === 'desktop') {
+    toast('🖥️ Web không mở được FF trên PC', 'error');
+    return;
+  }
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> ĐANG MỞ...';
+  }
+  openViaDeepLink();
+  setTimeout(() => {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '🎮 MỞ FREE FIRE';
+    }
+    if (!document.hidden && getPlatform() === 'android') openFFModal();
+  }, 2000);
+  toast('🚀 Đang mở Free Fire...', 'success');
+}
+
+/* ============================================================
+   ⚡ BẬT/TẮT TẤT CẢ
+   ============================================================ */
+function toggleAll(on) {
+  const tier = localStorage.getItem('@cl_tier') || VALID_TIER;
+  const states = {};
+  FEATURES.forEach((f) => {
+    if (f.pro && tier !== 'vip') return;
+    states[f.id] = on;
+  });
+  saveFeatureStates(states);
+  renderFeatures(tier);
+  Sound.play(on ? 'power' : 'toggleOff');
+  toast(on ? '⚡ Đã bật tất cả' : '⛔ Đã tắt tất cả', on ? 'success' : 'info');
+}
+
+/* ============================================================
+   🚀 KHỞI ĐỘNG
+   ============================================================ */
+function boot() {
+  // Xóa sạch ô input (chống autofill)
+  const inputEl = document.getElementById('keyInput');
+  if (inputEl) {
+    inputEl.value = '';
+    setTimeout(() => {
+      inputEl.removeAttribute('readonly');
+      inputEl.value = '';
+    }, 100);
+    // Xóa lần 2 sau 500ms (chống autofill chậm)
+    setTimeout(() => {
+      if (inputEl.value) inputEl.value = '';
+    }, 500);
+  }
+
+  // Nếu có session cũ → vào thẳng
+  const savedKey = localStorage.getItem('@cl_key');
+  if (savedKey === VALID_KEY && localStorage.getItem('@cl_session') === '1') {
+    setTimeout(() => enterApp(), 300);
+    return;
+  }
+
+  showScreen('screenKey');
+}
+
+/* ============================================================
+   🎯 GẮN SỰ KIỆN
+   ============================================================ */
+function bindEvents() {
+  // Nút âm thanh
+  const btnSound = document.getElementById('btnSound');
+  if (btnSound) {
+    if (!Sound.isEnabled()) {
+      btnSound.textContent = '🔇';
+      btnSound.classList.add('muted');
+    }
+    btnSound.addEventListener('click', () => {
+      const on = Sound.toggle();
+      btnSound.textContent = on ? '🔊' : '🔇';
+      btnSound.classList.toggle('muted', !on);
+      btnSound.classList.add('ping');
+      setTimeout(() => btnSound.classList.remove('ping'), 400);
+      toast(on ? '🔊 Bật âm thanh' : '🔇 Tắt âm thanh', on ? 'success' : 'info');
+    });
+  }
+
+  // Toggle remember
+  const toggleRem = document.getElementById('toggleRemember');
+  if (toggleRem) {
+    toggleRem.addEventListener('click', () => {
+      Sound.play('click');
+      document.getElementById('cbRemember')?.classList.toggle('on');
+    });
+  }
+
+  // Nút XÁC MINH
+  const btnVerify = document.getElementById('btnVerify');
+  if (btnVerify) btnVerify.addEventListener('click', handleVerify);
+
+  // Enter + auto-format
+  const keyInput = document.getElementById('keyInput');
+  if (keyInput) {
+    keyInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleVerify();
+    });
+    keyInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+    });
+  }
+
+  // Logout
+  const btnLogout = document.getElementById('btnLogout');
+  if (btnLogout) {
+    btnLogout.addEventListener('click', () => {
+      Sound.play('bye');
+      localStorage.removeItem('@cl_key');
+      localStorage.removeItem('@cl_session');
+      const input = document.getElementById('keyInput');
+      if (input) input.value = '';
+      showScreen('screenKey');
+      toast('👋 Đã đăng xuất', 'info');
+    });
+  }
+
+  // All on/off
+  document.getElementById('btnAllOn')?.addEventListener('click', () => toggleAll(true));
+  document.getElementById('btnAllOff')?.addEventListener('click', () => toggleAll(false));
+
+  // Mở FF
+  document.getElementById('btnOpenFF')?.addEventListener('click', handleOpenFF);
+  document.getElementById('btnFallback')?.addEventListener('click', () => {
+    Sound.play('click');
+    openFFModal();
+  });
+
+  // Modal options
+  document.querySelectorAll('.modal-option').forEach((opt) => {
+    opt.addEventListener('click', () => {
+      Sound.play('click');
+      const method = opt.dataset.method;
+      closeFFModal();
+      if (method === 'deeplink') openViaDeepLink();
+      else if (method === 'intent') openViaIntent();
+      else if (method === 'store') openStore();
+    });
+  });
+
+  document.getElementById('btnModalCancel')?.addEventListener('click', () => {
+    Sound.play('click');
+    closeFFModal();
+  });
+
+  document.getElementById('ffModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'ffModal') closeFFModal();
+  });
+
+  // Init audio khi chạm lần đầu
+  const initAudio = () => {
+    Sound.init();
+    document.body.removeEventListener('touchstart', initAudio);
+    document.body.removeEventListener('click', initAudio);
+  };
+  document.body.addEventListener('touchstart', initAudio, { once: true });
+  document.body.addEventListener('click', initAudio, { once: true });
+}
+
+/* ============================================================
+   🎬 CHẠY
+   ============================================================ */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    bindEvents();
+    boot();
+  });
+} else {
+  bindEvents();
+  boot();
+}
+</script>
+</body>
+</html>
